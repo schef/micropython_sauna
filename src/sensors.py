@@ -9,8 +9,9 @@ realtime_sensors = []
 on_state_change_cb = None
 
 alias = {
-#    "28ffb23484160547": "air",
-#    "28bb3749f6c73cdc": "liquid",
+    "28a42f54000000df": "temp_direct",
+#    "28bb3749f6c73cdc": "temp_indirect",
+#    "28bb3749f6c73cdc": "temp_outside",
 }
 
 class DsTempReader:
@@ -35,7 +36,7 @@ class DsTempReader:
             for rom in roms:
                 name = self.get_name(rom)
                 temp = self.ds_sensor.read_temp(rom)
-                self.data[alias[name]] = temp
+                self.data[alias.get(name, name)] = temp
                 self.dirty = True
         except Exception as e:
             print("[SENSORS]: ERROR @ %s read with %s" % (self.alias, e))
@@ -65,8 +66,13 @@ async def environment_sensors_action():
                     sensor.dirty = False
                     if on_state_change_cb is not None:
                         if sensor.alias == "DSTEMP":
-                            on_state_change_cb("liquid", sensor.data.get("liquid"))
-                            on_state_change_cb("air", sensor.data.get("air"))
+                            for sensor_name in sensor.data.items():
+                                if sensor_name in alias.items():
+                                    on_state_change_cb("temp_direct", sensor.data.get("temp_direct"))
+                                    on_state_change_cb("temp_indirect", sensor.data.get("temp_indirect"))
+                                    on_state_change_cb("temp_outside", sensor.data.get("temp_outside"))
+                                else:
+                                    on_state_change_cb(sensor.alias, sensor.data)
                         else:
                             on_state_change_cb(sensor.alias, sensor.data)
 

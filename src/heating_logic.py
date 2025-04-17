@@ -34,13 +34,12 @@ def is_power_on():
     return power_on_status
 
 def get_temperature():
-    temp_direct = sensors.environment_sensors[0].get_temperature()
-    #TODO: set temp
-    return None
+    temperatures = sensors.environment_sensors[0].get_temperature()
+    temp_direct = temperatures.get("temp_direct")
     if temp_direct is not None:
         if temp_direct >= 130.0:
             return None
-        if temp_direct <= -15.0:
+        elif temp_direct <= -15.0:
             return None
     return temp_direct
 
